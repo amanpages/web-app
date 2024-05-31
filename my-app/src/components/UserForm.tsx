@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Button, Container, TextField, Typography } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,17 +42,17 @@ const UserForm: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-      }
-    };
+  const handleBeforeUnload = useCallback((e: BeforeUnloadEvent) => {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    }
+  }, [isDirty]);
 
+  useEffect(() => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty]);
+  }, [handleBeforeUnload]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -105,8 +105,8 @@ const UserForm: React.FC = () => {
           setSubmittedUserData(userWithId);
           localStorage.setItem('submittedUserData', JSON.stringify(userWithId));
           setIsDirty(false);
-          
-          // Reload the page after submission without prompt
+
+          // Remove the event listener and reload the page
           window.removeEventListener('beforeunload', handleBeforeUnload);
           window.location.reload();
         }
@@ -118,7 +118,7 @@ const UserForm: React.FC = () => {
         localStorage.setItem('submittedUserData', JSON.stringify(userWithId));
         setIsDirty(false);
 
-        // Reload the page after submission without prompt
+        // Remove the event listener and reload the page
         window.removeEventListener('beforeunload', handleBeforeUnload);
         window.location.reload();
       }
