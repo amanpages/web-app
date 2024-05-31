@@ -51,7 +51,9 @@ const UserForm: React.FC = () => {
 
   useEffect(() => {
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [handleBeforeUnload]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
