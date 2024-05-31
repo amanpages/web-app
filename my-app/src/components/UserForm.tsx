@@ -85,20 +85,31 @@ const UserForm: React.FC = () => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
-  if (validateForm()) {
-    const storedUserData = localStorage.getItem('userData');
-    if (storedUserData) {
-      const existingUserData: UserData = JSON.parse(storedUserData);
-      const isDuplicateData =
-        existingUserData.name === userData.name &&
-        existingUserData.address === userData.address &&
-        existingUserData.email === userData.email &&
-        existingUserData.phone === userData.phone;
+    e.preventDefault();
+    if (validateForm()) {
+      const storedUserData = localStorage.getItem('userData');
+      if (storedUserData) {
+        const existingUserData: UserData = JSON.parse(storedUserData);
+        const isDuplicateData =
+          existingUserData.name === userData.name &&
+          existingUserData.address === userData.address &&
+          existingUserData.email === userData.email &&
+          existingUserData.phone === userData.phone;
 
-      if (isDuplicateData) {
-        // Data is identical, user already exists
-        alert('User already exists!');
+        if (isDuplicateData) {
+          alert('User already exists!');
+        } else {
+          const userId = uuidv4();
+          const userWithId = { ...userData, id: userId };
+          localStorage.setItem('userData', JSON.stringify(userWithId));
+          setSubmittedUserData(userWithId);
+          localStorage.setItem('submittedUserData', JSON.stringify(userWithId));
+          setIsDirty(false);
+          
+          // Reload the page after submission without prompt
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+          window.location.reload();
+        }
       } else {
         const userId = uuidv4();
         const userWithId = { ...userData, id: userId };
@@ -106,24 +117,14 @@ const UserForm: React.FC = () => {
         setSubmittedUserData(userWithId);
         localStorage.setItem('submittedUserData', JSON.stringify(userWithId));
         setIsDirty(false);
-        
-        // Reload the page after submission
+
+        // Reload the page after submission without prompt
+        window.removeEventListener('beforeunload', handleBeforeUnload);
         window.location.reload();
       }
-    } else {
-      const userId = uuidv4();
-      const userWithId = { ...userData, id: userId };
-      localStorage.setItem('userData', JSON.stringify(userWithId));
-      setSubmittedUserData(userWithId);
-      localStorage.setItem('submittedUserData', JSON.stringify(userWithId));
-      setIsDirty(false);
-
-      // Reload the page after submission
-      window.location.reload();
     }
-  }
-};
-  
+  };
+
   return (
     <Container maxWidth="sm">
       <Box
